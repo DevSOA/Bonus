@@ -1466,8 +1466,8 @@ def calculate_quarter_proration(start_date,end_date):
 
     
 def get_currency_exchange(from_currency,to_currency,date_of_conversion):
-    logger.info("Getting currency")
-    try:
+        logger.info("Getting currency")
+    #try:
         if from_currency == to_currency:
             return 1
         from_currency = from_currency.strip()
@@ -1490,10 +1490,10 @@ def get_currency_exchange(from_currency,to_currency,date_of_conversion):
         #print(ret)
         #print(ret.text)
         rate = float(json.loads(ret.text)["items"][0]["ConversionRate"])
-    except:
-        logger.info("Error cant rate conversion")
-        return "Error : cant calculate rate conversion // "
-    return rate
+    #except:
+    #    logger.info("Error cant rate conversion")
+    #    return "Error : cant calculate rate conversion // "
+        return rate
 
 
 def create_pivot(pivot_data):
