@@ -1590,7 +1590,9 @@ def create_Journals(pivot,end_date,reversal,quarter_to_calculate,taxes,quarters)
                 tax =  round(debit * taxes[i][quarter_to_calculate-1],2)
                 #tax = set_n_digits(tax)
                 #print(tax)
-                conversion_rate = round(get_currency_exchange(currency,"USD",quarters[quarter_to_calculate-1][0]))# end_date)   )
+                CR=get_currency_exchange(currency,"USD",quarters[quarter_to_calculate-1][0])
+                print(CR)
+                conversion_rate = round(CR)# end_date)   )
                 converted = debit * conversion_rate
                 #converted = set_n_digits(converted)
                 tax_converted = tax * conversion_rate
