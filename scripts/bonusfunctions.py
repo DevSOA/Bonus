@@ -1330,14 +1330,14 @@ def create_pivot_data(Employee_dic,quarters,proration,taxes,cutoff,quarter_to_ca
                 #cal.write(f"\nTotal:{total_amount}\n\n")
                 hr=hr.strftime("%Y-%m-%d")
                 #if total_amount > 0:
-                Original_Journal[count] = {"ID" : id,"Date" : hr,'Entity' : Entity ,'Dpt': dpt, 'Currency' : to_currency , 'Amount' : total_amount }  
-                count +=1
                 #if temporal_item != {0}:
                 #    Original_Journal[count] = temporal_item 
                 #    count +=1
                 data=first_data
                 if int(percen_quarter_worked) > 0:
                     f.write(data_to_write)
+                    Original_Journal[count] = {"ID" : id,"Date" : hr,'Entity' : Entity ,'Dpt': dpt, 'Currency' : to_currency , 'Amount' : total_amount }  
+                    count +=1
         reversed_file=""
         file_string  = ""
         with open(f"{data_path}\\calculation.txt","r") as f:
