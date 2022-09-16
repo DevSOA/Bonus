@@ -403,7 +403,8 @@ def Get_Xml_Data(year):
         Sec = 0
         Status = "1"
         Type = "Regular"
-        HRDate= "2012-12-12" 
+        HRDate= "2012-12-12"
+        JHDate= "2012-12-12"
         PFTime="Full"
         Salary=float(0.0)
         Currency = "USD"
@@ -435,6 +436,7 @@ def Get_Xml_Data(year):
                         pass
                     try:
                         HRDate = i["wd:Hire_Date"]
+                        JHDate = i["wd:Hire_Date"]
                     except:
                         #print(f"HR Is not comming")
                         pass
@@ -494,6 +496,7 @@ def Get_Xml_Data(year):
                     "Employee_Status":Status,
                     "Employee_Type":Type,
                     "Employee_HE_Date":HRDate,
+                    "Employee_JH_Date":JHDate,
                     "Employee_PF_Time":PFTime,
                     "Employee_Current_Salary":Salary,
                     "Employee_Current_Currency":Currency,
@@ -534,6 +537,7 @@ def Get_Xml_Data(year):
                             "Employee_Status":Status,
                             "Employee_Type":Type,
                             "Employee_HE_Date":HRDate,
+                            "Employee_JH_Date":JHDate,
                             "Employee_PF_Time":PFTime,
                             "Employee_Current_Salary":Salary,
                             "Employee_Current_Currency":Currency,
@@ -577,6 +581,7 @@ def Get_Xml_Data(year):
                                 "Employee_Status":Status,
                                 "Employee_Type":Type,
                                 "Employee_HE_Date":HRDate,
+                                "Employee_JH_Date":JHDate,
                                 "Employee_PF_Time":PFTime,
                                 "Employee_Current_Salary":Salary,
                                 "Employee_Current_Currency":Currency,
@@ -1122,7 +1127,48 @@ def get_dict_with_condition(employee_data,field,value):
 
 
 
-   
+'''   
+def get_data_before_cutoff(employee_data,cutoffdate):
+    logger.info("removing data before cutoff")
+    try:
+        employees_with_benefits = {}
+        count = 0
+        for i in employee_data.keys():
+            try:
+                dateHR =  datetime.strptime(employee_data[i]["Employee_HE_Date"][0:-6], '%Y-%m-%d')
+            except:
+                dateHR =  datetime.strptime(employee_data[i]["Employee_HE_Date"], '%Y-%m-%d')
+            if dateHR <= cutoffdate:
+                employees_with_benefits[count]=employee_data[i]
+                count+=1
+    except:
+        logger.info("Error on get cuttof")
+        return "Error cant get employees before cutoff // // "
+    return employees_with_benefits
+'''
+
+
+def get_data_before_cutoff(employee_data,cutoffdate):
+    logger.info("removing data before cutoff")
+    try:
+        employees_with_benefits = {}
+        count = 0
+        for i in employee_data.keys():
+            try:
+                dateHR =  datetime.strptime(employee_data[i]["Employee_JH_Date"][0:-6], '%Y-%m-%d')
+            except:
+                dateHR =  datetime.strptime(employee_data[i]["Employee_JH_Date"], '%Y-%m-%d')
+            if dateHR <= cutoffdate:
+                employees_with_benefits[count]=employee_data[i]
+                count+=1
+    except:
+        logger.info("Error on get cuttof")
+        return "Error cant get employees before cutoff // // "
+    return employees_with_benefits
+    
+    
+    
+
 def get_data_before_cutoff(employee_data,cutoffdate):
     logger.info("removing data before cutoff")
     try:
@@ -1260,7 +1306,7 @@ def create_pivot_data(Employee_dic,quarters,proration,taxes,cutoff,quarter_to_ca
                 #time.sleep(50)
                 if  "Fixed Percent" in first_data[5]:
                     print("Bonus")
-                    data_to_write+=f"Salary for employee {employee_current_id} : {first_data[6]}\n"
+                    data_to_write+=f"Salary for employee {employee_current_id} : {first_data[6]} {to_currency}\n"
                     data_to_write+=f"Percentage of Bonus for employee {employee_current_id} : {first_data[7]}\n"
                     bonus_amount= float(first_data[6]) * float(first_data[7])
                     data_to_write+=f"Initial calculation: Bonus Amount * Percentage [{bonus_amount}]\n"
@@ -1325,7 +1371,7 @@ def create_pivot_data(Employee_dic,quarters,proration,taxes,cutoff,quarter_to_ca
                 #data_to_write+=f"How much the employee {employee_current_id} must be paid for this calculation? --> {total_amount}\n")
                 #cal.write(f"Subtotal: {total_amount} \t")
                 total_amount = round(total_amount)
-                data_to_write+=f"Rounded: {total_amount}\n\n\n"
+                data_to_write+=f"Rounded: {total_amount} {to_currency}\n\n\n"
                 #data_to_write+=f"Total amount the employee {employee_current_id} must be paid? --> {total_amount}\n\n\n")
                 #cal.write(f"\nTotal:{total_amount}\n\n")
                 hr=hr.strftime("%Y-%m-%d")
@@ -1709,8 +1755,8 @@ def create_Journals(pivot,end_date,reversal,quarter_to_calculate,taxes,quarters)
             
             journal_entry = f"{header_soap}{journal_line}{foot}"
             journal_tx_entry = f"{header_soap_tx}{journal_tax_line}{foot}"
-            journal_converted_entry = f"{header_soap_us}{journal_converted_line}{foot}"
-            journal_tx_converted_entry = f"{header_soap_us_tx}{journal_tax_converted_tax_line}{foot}"
+            ####journal_converted_entry = f"{header_soap_us}{journal_converted_line}{foot}"
+            ####journal_tx_converted_entry = f"{header_soap_us_tx}{journal_tax_converted_tax_line}{foot}"
             #with open(f"{data_path}\\journal.txt","a+") as jrn:
             #    jrn.write(journal_tx_entry)
             logger.info("Journal lines pushed")
@@ -1725,16 +1771,16 @@ def create_Journals(pivot,end_date,reversal,quarter_to_calculate,taxes,quarters)
                 #print(response_to_push.text)
                 print("Error on pushing")
                 return ["Error on pushed Journal lines //"]
-            response_to_push = Push_To_Oracle(journal_converted_entry)
-            if ">0</result>" not in response_to_push.text:
-                #print(response_to_push.text)
-                #print("Error on pushing")
-                return ["Error on pushed Journal lines //  "]
-            response_to_push = Push_To_Oracle(journal_tx_converted_entry)
-            if ">0</result>" not in response_to_push.text:
-                #print(response_to_push.text)
-                print("Error on pushing")
-                return ["Error on pushed Journal lines // "]
+            ####response_to_push = Push_To_Oracle(journal_converted_entry)
+            ####if ">0</result>" not in response_to_push.text:
+            ####    #print(response_to_push.text)
+            ####    #print("Error on pushing")
+            ####    return ["Error on pushed Journal lines //  "]
+            ####response_to_push = Push_To_Oracle(journal_tx_converted_entry)
+            ####if ">0</result>" not in response_to_push.text:
+            ####    #print(response_to_push.text)
+            ####    print("Error on pushing")
+            ####    return ["Error on pushed Journal lines // "]
             importing = Create_Import_SOAP(set_id, source_id,Ledger_id , f"{group_id}")
             response_import = Import_to_GL(importing)
             import_id = json.loads(response_import.text)["ReqstId"]
